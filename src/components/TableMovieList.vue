@@ -9,10 +9,12 @@
         </v-col>
         <v-col cols="6" class="pa-0">
           <v-text-field
+            v-model="year"
             outlined
             dense
             single-line
             placeholder="Filter by year"
+
           ></v-text-field>
         </v-col>
       </v-row>
@@ -28,6 +30,7 @@ import { AxiosResponse } from 'axios';
 import Vue from 'vue';
 
 export default Vue.extend({
+
   async mounted() {
     const response = await this.getMovieList({});
     this.items = response && response.data.content;
@@ -51,14 +54,23 @@ export default Vue.extend({
         .catch((error) => console.error(error));
     },
   },
-  // watch: {
-  //   winner: {
-  //     immediate: true,
-  //     handler(value) {
-  //       this.getMovieList({});
-  //     },
-  //   },
-  // },
+
+  watch: {
+    year: {
+      immediate: true,
+      async handler() {
+        const response = await this.getMovieList({});
+        this.items = response && response.data.content;
+      },
+    },
+    winner: {
+      immediate: true,
+      async handler() {
+        const response = await this.getMovieList({});
+        this.items = response && response.data.content;
+      },
+    },
+  },
 
 });
 </script>
