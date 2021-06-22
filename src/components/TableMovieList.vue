@@ -1,9 +1,16 @@
 <template>
   <v-container>
-
-    <v-card :loading="loading">
+    <v-card>
       <v-card-title>List movies</v-card-title>
-      <v-data-table :headers="headers" :items="items" disable-sort>
+      <v-data-table
+        :headers="headers"
+        :items="items"
+        :loading="loading"
+        :server-items-length="totalItems"
+        :options.sync="options"
+        :footer-props="footerProps"
+
+      >
         <template #[`header.year`]>
           <v-row>
             <v-col cols="12">
@@ -45,6 +52,7 @@
         <template #[`item.winner`]="{ item }">
           <td>{{item.winner?'Yes':'No'}}</td>
         </template>
+
       </v-data-table>
     </v-card>
   </v-container>
@@ -54,12 +62,13 @@
 
 import Vue from 'vue';
 
+interface DataTableOptions {
+  page:number,
+  itemsPerPage:number
+}
+
 export default Vue.extend({
 
-  mounted() {
-    // this.getMovieList({});
-    // this.items = response && response.data.content;
-  },
   data: () => ({
     headers: [
       { text: 'Id', value: 'id' },
@@ -71,18 +80,33 @@ export default Vue.extend({
     winner: null,
     year: '',
     loading: false,
+    totalItems: 0,
+    options: { } as DataTableOptions,
+    footerProps: {
+      'items-per-page-options': [5, 10, 15, 99],
+    },
+
   }),
+  mounted() {
+    this.getMovieList();
+  },
   methods: {
-    getMovieList({ page = 0, size = 99 }) {
+
+    getMovieList() {
+      const {
+        page, itemsPerPage,
+      } = this.options;
+
       if (this.year !== '' && this.year.length !== 4) {
         return;
       }
       this.loading = true;
       const paramWinner = this.winner ? `&winner=${this.winner}` : '';
       const paramYear = this.year ? `&year=${this.year}` : '';
-      this.$http.get(`?page=${page}&size=${size}${paramWinner}${paramYear}`)
+      this.$http.get(`?page=${page - 1}&size=${itemsPerPage}${paramWinner}${paramYear}`)
         .then((response) => {
           this.items = response.data.content;
+          this.totalItems = response.data.totalElements;
           this.loading = false;
         })
         .catch((error) => console.error(error));
@@ -90,15 +114,20 @@ export default Vue.extend({
   },
 
   watch: {
+    options: {
+      handler() {
+        this.getMovieList();
+      },
+      deep: true,
+    },
     year: {
-      immediate: true,
-      async handler() {
-        this.getMovieList({});
+      handler() {
+        this.getMovieList();
       },
     },
     winner: {
-      async handler() {
-        this.getMovieList({});
+      handler() {
+        this.getMovieList();
       },
     },
 
