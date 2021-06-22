@@ -7,8 +7,6 @@ import vuetify from './plugins/vuetify';
 Vue.config.productionTip = false;
 
 Vue.prototype.$http = axios;
-console.log('process.env.apiUrl :>> ', process.env.apiUrl);
-console.log('process.env :>> ', process.env);
 
 new Vue({
   router,

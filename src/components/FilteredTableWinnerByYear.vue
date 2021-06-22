@@ -39,7 +39,6 @@ export default Vue.extend({
   }),
   methods: {
     async getWinnersByYear(year:string):Promise<AxiosResponse|void> {
-      console.log('year :>> ', year);
       const response = await this.$http.get(`?winner=true&year=${year}`)
         .catch((error) => console.error(error));
       this.movies = response?.data;
